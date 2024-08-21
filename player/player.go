@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	minVolume = -2.0
-	maxVolume = 2.0
+	minVolume = -10
+	maxVolume = 2
 )
 
 type Player struct {
@@ -56,6 +56,17 @@ func New(file *os.File) (*Player, error) {
 	return p, nil
 }
 
+func (p *Player) PlayPause() {
+	speaker.Lock()
+	defer speaker.Unlock()
+
+	p.ctrl.Paused = !p.ctrl.Paused
+}
+
+func (p *Player) Paused() bool {
+	return p.ctrl.Paused
+}
+
 func (p *Player) Forward(seconds int) {
 	speaker.Lock()
 	defer speaker.Unlock()
@@ -85,17 +96,16 @@ func (p *Player) Backward(seconds int) {
 }
 
 func (p *Player) VolumeUp(num float64) {
+	speaker.Lock()
+	defer speaker.Unlock()
+
 	num = math.Abs(num)
 
 	volume := &p.sound.Volume
 
-	if *volume >= maxVolume {
-		return
+	if *volume < maxVolume-0.1 {
+		*volume += num
 	}
-
-	speaker.Lock()
-	*volume += num
-	speaker.Unlock()
 }
 
 func (p *Player) Total() time.Duration {
@@ -103,21 +113,22 @@ func (p *Player) Total() time.Duration {
 }
 
 func (p *Player) VolumeDown(num float64) {
-	num = -math.Abs(num)
+	speaker.Lock()
+	defer speaker.Unlock()
 
 	volume := &p.sound.Volume
 
-	if *volume <= minVolume {
-		return
+	if *volume > minVolume+0.1 {
+		*volume -= math.Abs(num)
 	}
+}
 
-	speaker.Lock()
-	*volume += num
-	speaker.Unlock()
+func (p *Player) Current() time.Duration {
+	return time.Duration(p.format.SampleRate.D(p.seeker.Position()))
 }
 
 func (p *Player) Volume() float64 {
-	return p.sound.Volume
+	return math.Round(p.sound.Volume*10) / 10
 }
 
 func (p *Player) Start() {
