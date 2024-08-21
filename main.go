@@ -3,44 +3,37 @@ package main
 import (
 	"fmt"
 	"log"
-	"math"
 	"os"
 
-	"github.com/dionvu/goplay/player"
-	kb "github.com/eiannone/keyboard"
-	"github.com/gopxl/beep/speaker"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/dionvu/gomp/player"
+	pb "github.com/dionvu/gomp/progressbar"
 )
 
 func main() {
-	kb.Open()
+	if len(os.Args) < 2 {
+		fmt.Println("no file in argument")
+		return
+	}
 
-	defer kb.Close()
+	arg := os.Args[1]
 
-	f, err := os.Open(os.Args[1])
+	f, err := os.Open(arg)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("invalid file, `gomp help` for help")
+		return
 	}
 
 	player, err := player.New(f)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer player.Streamer.Close()
+	defer player.Close()
 
-	speaker.Play(player.Resampler)
+	player.Start()
 
-	for {
-		char, key, _ := kb.GetKey()
-
-		switch char {
-		case 'p':
-			player.VolumeUp(0.1)
-			fmt.Println(math.Round(player.Volume()*10) / 10)
-		}
-
-		switch key {
-		case kb.KeyCtrlC:
-			return
-		}
+	tp := tea.NewProgram(pb.New(10, player))
+	if _, err := tp.Run(); err != nil {
+		log.Fatal(err)
 	}
 }
