@@ -1,4 +1,4 @@
-package timer
+package ui
 
 import (
 	"fmt"
@@ -76,11 +76,11 @@ func (m Model) View() string {
 
 	help := fmt.Sprintf("%10s %s %-10s", "", "p", "pause") +
 		fmt.Sprintf("%s %-15s", "f", fmt.Sprint("foward ", forwardInterval, "s")) +
-		fmt.Sprintf("%s %s\n", "b", fmt.Sprint("backward ", BackwardInterval, "s"))
+		fmt.Sprintf("%s %s\n", "u", "volume up")
 
 	help += fmt.Sprintf("%10s %s %-10s", "", "q", "quit") +
 		fmt.Sprintf("%s %-15s", "b", fmt.Sprint("back ", BackwardInterval, "s")) +
-		fmt.Sprintf("%s %s\n", "b", fmt.Sprint("backward ", BackwardInterval, "s"))
+		fmt.Sprintf("%s %s\n", "d", "volume down")
 
 	return "\n" + header + "\n\n" + help + "\n"
 }

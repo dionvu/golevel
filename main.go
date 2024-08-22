@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dionvu/gomp/player"
-	"github.com/dionvu/gomp/timer"
+	"github.com/dionvu/gomp/ui"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 
 	player.Start()
 
-	tp := tea.NewProgram(timer.New(10, player))
+	tp := tea.NewProgram(ui.New(10, player))
 	if _, err := tp.Run(); err != nil {
 		log.Fatal(err)
 	}
