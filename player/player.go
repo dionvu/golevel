@@ -103,13 +103,9 @@ func (p *Player) VolumeUp(num float64) {
 
 	volume := &p.sound.Volume
 
-	if *volume < maxVolume-0.1 {
+	if *volume < maxVolume {
 		*volume += num
 	}
-}
-
-func (p *Player) Total() time.Duration {
-	return p.format.SampleRate.D(p.seeker.Len())
 }
 
 func (p *Player) VolumeDown(num float64) {
@@ -118,23 +114,32 @@ func (p *Player) VolumeDown(num float64) {
 
 	volume := &p.sound.Volume
 
-	if *volume > minVolume+0.1 {
+	if *volume > minVolume {
 		*volume -= math.Abs(num)
 	}
 }
 
+// The total time length of the media currently playing.
+func (p *Player) Total() time.Duration {
+	return p.format.SampleRate.D(p.seeker.Len())
+}
+
+// The current time position of the media currently playing.
 func (p *Player) Current() time.Duration {
 	return time.Duration(p.format.SampleRate.D(p.seeker.Position()))
 }
 
+// The current volume. 0 = Default
 func (p *Player) Volume() float64 {
 	return math.Round(p.sound.Volume*10) / 10
 }
 
+// Starts audio in speaker.
 func (p *Player) Start() {
 	speaker.Play(p.resampler)
 }
 
+// closes the player streamer.
 func (p *Player) Close() {
 	p.streamer.Close()
 }

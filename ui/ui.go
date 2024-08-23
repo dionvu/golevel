@@ -47,17 +47,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		case "f":
+		case "f", "l":
 			m.player.Forward(forwardInterval)
 
-		case "b":
+		case "b", "h":
 
 			m.player.Backward(BackwardInterval)
 
-		case "u":
+		case "u", "k":
 			m.player.VolumeUp(0.1)
 
-		case "d":
+		case "d", "j":
 			m.player.VolumeDown(0.1)
 
 		case "p", " ":
@@ -70,19 +70,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	curr := secondsFormat(int(m.player.Current().Seconds()))
+	total := secondsFormat(int(m.player.Total().Seconds()))
+	volume := m.player.Volume()
 
-	header := fmt.Sprintf("%10s %-10s %-10s Volume: %v", "", curr,
-		secondsFormat(int(m.player.Total().Seconds())), m.player.Volume())
+	header := fmt.Sprintf(
+		"%5s %-10s %-10s Volume: %.1f",
+		"",
+		curr,
+		total,
+		volume,
+	)
 
-	help := fmt.Sprintf("%10s %s %-10s", "", "p", "pause") +
-		fmt.Sprintf("%s %-15s", "f", fmt.Sprint("foward ", forwardInterval, "s")) +
-		fmt.Sprintf("%s %s\n", "u", "volume up")
+	help := fmt.Sprintf(
+		"%5s %s %-15s %s %-15s %s %s\n",
+		"", // Ident
+		"f", fmt.Sprintf("forward %ds", forwardInterval),
+		"u", "volume up",
+		"p", "pause",
+	) + fmt.Sprintf(
+		"%5s %s %-15s %s %-15s %s %s\n",
+		"", // Ident
+		"b", fmt.Sprintf("back %ds", BackwardInterval),
+		"d", "volume down",
+		"q", "quit",
+	)
 
-	help += fmt.Sprintf("%10s %s %-10s", "", "q", "quit") +
-		fmt.Sprintf("%s %-15s", "b", fmt.Sprint("back ", BackwardInterval, "s")) +
-		fmt.Sprintf("%s %s\n", "d", "volume down")
-
-	return "\n" + header + "\n\n" + help + "\n"
+	return "\n" + header + "\n\n" + help
 }
 
 func secondsFormat(seconds int) string {
