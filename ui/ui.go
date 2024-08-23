@@ -48,10 +48,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "f", "l":
+			if m.player.Current().Seconds() >= m.player.Total().Seconds() {
+				return m, tea.Quit
+			}
+
 			m.player.Forward(forwardInterval)
 
 		case "b", "h":
-
 			m.player.Backward(BackwardInterval)
 
 		case "u", "k":

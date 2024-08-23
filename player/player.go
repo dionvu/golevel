@@ -11,11 +11,6 @@ import (
 	"github.com/gopxl/beep/speaker"
 )
 
-const (
-	minVolume = -10
-	maxVolume = 2
-)
-
 type Player struct {
 	streamer  beep.StreamCloser
 	seeker    beep.StreamSeeker
@@ -23,6 +18,8 @@ type Player struct {
 	ctrl      *beep.Ctrl
 	resampler *beep.Resampler
 	sound     *effects.Volume
+	MinVolume float64
+	MaxVolume float64
 }
 
 func New(file *os.File) (*Player, error) {
@@ -51,6 +48,8 @@ func New(file *os.File) (*Player, error) {
 		format:    format,
 		resampler: speed,
 		sound:     volume,
+		MaxVolume: 2,
+		MinVolume: -10,
 	}
 
 	return p, nil
@@ -73,10 +72,6 @@ func (p *Player) Forward(seconds int) {
 
 	samplesToSkip := p.format.SampleRate.N(time.Second) * seconds
 	targetPositionSamples := p.seeker.Position() + samplesToSkip
-
-	if targetPositionSamples > p.seeker.Len() {
-		targetPositionSamples = p.seeker.Len()
-	}
 
 	p.seeker.Seek(targetPositionSamples)
 }
@@ -103,7 +98,7 @@ func (p *Player) VolumeUp(num float64) {
 
 	volume := &p.sound.Volume
 
-	if *volume < maxVolume {
+	if *volume < p.MaxVolume {
 		*volume += num
 	}
 }
@@ -114,7 +109,7 @@ func (p *Player) VolumeDown(num float64) {
 
 	volume := &p.sound.Volume
 
-	if *volume > minVolume {
+	if *volume > p.MinVolume {
 		*volume -= math.Abs(num)
 	}
 }
